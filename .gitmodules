@@ -1,6 +1,6 @@
 [submodule "Frontend/frontend"]
 	path = Frontend/frontend
-	url = https://github.com/Mart6110/frontend
+	url = https://github.com/GoosLife/sandbattery-frontend
 [submodule "Backend/sandbattery-backend"]
 	path = Backend/sandbattery-backend
 	url = https://github.com/GoosLife/sandbattery-backend
