@@ -1,0 +1,6 @@
+ingress:
+  - hostname: dunepower.acceptable.pro
+    service: http://frontend:80
+  - hostname: api.dunepower.acceptable.pro
+    service: http://backend:8080
+  - service: http://localhost:404

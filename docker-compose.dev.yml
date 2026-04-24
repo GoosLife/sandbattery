@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.4
+    container_name: sandbattery-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - ./Db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - sandbattery-network
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./Backend/sandbattery-backend
+      dockerfile: sandbattery-backend/Dockerfile
+    container_name: sandbattery-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT}:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=${MYSQL_DATABASE};User=root;Password=${MYSQL_ROOT_PASSWORD};
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sandbattery-network
+
+  # Frontend Development Service
+  frontend:
+    build:
+      context: ./Frontend/frontend
+      dockerfile: Dockerfile.dev
+    container_name: sandbattery-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    volumes:
+      - ./Frontend/frontend/src:/app/src
+      - ./Frontend/frontend/public:/app/public
+      - ./Frontend/frontend/index.html:/app/index.html
+      - ./Frontend/frontend/vite.config.ts:/app/vite.config.ts
+      - ./Frontend/frontend/tsconfig.json:/app/tsconfig.json
+      - ./Frontend/frontend/eslint.config.js:/app/eslint.config.js
+    environment:
+      - VITE_API_BASE_URL=/api/v1
+    depends_on:
+      - backend
+    networks:
+      - sandbattery-network
+
+networks:
+  sandbattery-network:
+    driver: bridge

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.4
+    container_name: sandbattery-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - ./Db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - sandbattery-network
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./Backend/sandbattery-backend
+      dockerfile: sandbattery-backend/Dockerfile
+    container_name: sandbattery-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT}:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=${MYSQL_DATABASE};User=root;Password=${MYSQL_ROOT_PASSWORD};
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sandbattery-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./Frontend/frontend
+      dockerfile: Dockerfile
+    container_name: sandbattery-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - backend
+    networks:
+      - sandbattery-network
+
+  # Cloudflared Tunnel
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: sandbattery-cloudflared
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run --token eyJhIjoiZGQzYjBiMmIyYzZhMGZiMTRmZTJkOGMxNmNkM2VlMDQiLCJ0IjoiNjFmZjU5OWItYjJiMC00ZGUzLWFlNDQtZTZjYTQ2N2JlMGU0IiwicyI6Ik56aGhaamhsTldJdFpESTVNeTAwWWpNekxUbGlObU10T1dRMFlUQTNPR0ZrWlRaayJ9
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml
+    networks:
+      - sandbattery-network
+
+networks:
+  sandbattery-network:
+    driver: bridge
