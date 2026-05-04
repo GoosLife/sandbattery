@@ -28,15 +28,15 @@ mbed::Ticker pumpTicker;
   if (Serial) Serial.println(x)
 
 // ─── USER CONFIG ─────────────────────────────────────────────────────────────
-const char* WIFI_SSID = "Lab-ZBC";
-const char* WIFI_PASS = "Prestige#PuzzledCASH48!";
-const char* PRODUCT_KEY = "DP-SB-01";
+const char* WIFI_SSID = "SSD";
+const char* WIFI_PASS = "PASSWORD";
+const char* PRODUCT_KEY = "PRODUCT_KEY";
 
-const char* API_HOST = "dunepower-api.acceptable.pro";
+const char* API_HOST = "API_ADDRESS";
 const int API_PORT = 443;
 
-const char* CF_CLIENT_ID = "273cbc1aec51a1e9aec4d1f0e7ba73f1.access";
-const char* CF_CLIENT_SECRET = "2ce6650dd96b4bcb48b1dc2482b8874f0b4fd89fe1f060bb6af6bd27aebc8955";
+const char* CF_CLIENT_ID = "CF_CLIENT_ID";
+const char* CF_CLIENT_SECRET = "CF_CLIENT_SECRET";
 
 // ─── PINS ────────────────────────────────────────────────────────────────────
 #define RELAY_HEAT1 0
