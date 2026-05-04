@@ -61,7 +61,7 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: sandbattery-cloudflared
     restart: unless-stopped
-    command: tunnel --config /etc/cloudflared/config.yml run --token eyJhIjoiZGQzYjBiMmIyYzZhMGZiMTRmZTJkOGMxNmNkM2VlMDQiLCJ0IjoiNjFmZjU5OWItYjJiMC00ZGUzLWFlNDQtZTZjYTQ2N2JlMGU0IiwicyI6Ik56aGhaamhsTldJdFpESTVNeTAwWWpNekxUbGlObU10T1dRMFlUQTNPR0ZrWlRaayJ9
+    command: tunnel --config /etc/cloudflared/config.yml run --token ${CLOUDFLARED_TOKEN}
     volumes:
       - ./cloudflared/config.yml:/etc/cloudflared/config.yml
     networks:
